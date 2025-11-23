@@ -35,11 +35,19 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # 安装rest_framework
+    'rest_framework',
+    # 安装第三方cors
+    'corsheaders',
+    # 项目app
+    "apps.oaauth.apps.OaauthConfig"
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    # cors中间件一定要在CommonMiddleware前面
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.common.CommonMiddleware',
     # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -119,3 +127,9 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+# 允许所有域名跨域访问
+CORS_ALLOW_ALL_ORIGINS = True
+
+# 覆盖django自带的User模型
+# 语法: 'app.User模型名'
+AUTH_USER_MODEL = 'oaauth.OAUser'
