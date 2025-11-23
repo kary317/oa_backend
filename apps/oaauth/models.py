@@ -3,6 +3,8 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.hashers import make_password
+from shortuuidfield import ShortUUIDField
+
 
 # from django.contrib.auth.models import User, UserManager
 
@@ -50,6 +52,7 @@ class OAUser(AbstractBaseUser, PermissionsMixin):
     """
     自定义的User模型
     """
+    uid = ShortUUIDField(primary_key=True)
     realname = models.CharField(max_length=150, unique=False)
     email = models.EmailField(blank=False, unique=True)
     telephone = models.CharField(max_length=20, blank=True)
