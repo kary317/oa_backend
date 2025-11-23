@@ -64,6 +64,10 @@ class OAUser(AbstractBaseUser, PermissionsMixin):
 
     objects = OAUserManager()
 
+    # 员工的部门表,一个员工只能在一个部门,一个部门有多个员工
+    department = models.ForeignKey('OADepartment', null=True, on_delete=models.SET_NULL, related_name='staffs',
+                                   related_query_name='staffs')
+
     EMAIL_FIELD = "email"
     # from django.contrib.auth import authenticate
     # USERNAME_FIELD：是用来做鉴权的，会把authenticate的username参数，传给USERNAME_FIELD指定的字段
@@ -80,3 +84,16 @@ class OAUser(AbstractBaseUser, PermissionsMixin):
 
     def get_short_name(self):
         return self.realname
+
+
+class OADepartment(models.Model):
+    # 部门名称
+    name = models.CharField(max_length=100)
+    # 部门介绍
+    intro = models.CharField(max_length=200)
+    # 部门领导,设定每个部门只有一个领导
+    leader = models.OneToOneField(OAUser, null=True, on_delete=models.SET_NULL, related_name='leader_department',
+                                  related_query_name='leader_department')
+    # 部门管理者,设定多个部门可以被一个管理者管理
+    manager = models.ForeignKey(OAUser, null=True, on_delete=models.SET_NULL, related_name='manager_departments',
+                                related_query_name='manager_departments')

@@ -1,3 +1,4 @@
 .idea
 *.pyc
-*_initial.py
+apps/*/migrations/*.py
+!apps/*/migrations/__init__.py
