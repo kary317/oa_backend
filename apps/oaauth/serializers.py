@@ -1,9 +1,9 @@
 from rest_framework import serializers
-from .models import OAUser, UserStatusChoice
+from .models import OAUser, UserStatusChoice, OADepartment
 
 
 class LoginSerializer(serializers.Serializer):
-    email = serializers.CharField(max_length=30, write_only=True)
+    email = serializers.EmailField(write_only=True)
     password = serializers.CharField(max_length=20, min_length=6, write_only=True)
 
     def validate(self, attrs):
@@ -23,3 +23,18 @@ class LoginSerializer(serializers.Serializer):
 
         attrs['user'] = user
         return attrs
+
+
+class DepartmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OADepartment
+        fields = '__all__'
+
+
+class OAUserSerializer(serializers.ModelSerializer):
+    department = DepartmentSerializer(read_only=True)
+
+    class Meta:
+        model = OAUser
+        # fields = "__all__"
+        exclude = ('password', 'groups', 'user_permissions')
