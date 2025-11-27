@@ -1,6 +1,6 @@
 from django.http import JsonResponse
 from rest_framework.views import APIView
-from .serializers import LoginSerializer, OAUserSerializer
+from .serializers import LoginSerializer, OAUserSerializer, ResetPwdSerializer
 from rest_framework.response import Response
 from rest_framework import status
 import datetime
@@ -27,8 +27,16 @@ class LoginAPIView(APIView):
 #     permission_classes = [IsAuthenticated]
 
 
-class ResetPWDView(APIView):
+class ResetPwdView(APIView):
     def post(self, request):
-        print(request)
-        print(request.user)
-        return JsonResponse({'detail': 'success'})
+        # print(request)
+        # print(request.user)
+        serializer = ResetPwdSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            pwd = serializer.validated_data.get('pwd1')
+            request.user.set_password(pwd)
+            request.user.save()
+            return Response({'detail': '密码修改成功'})
+        else:
+            error_detail = list(serializer.errors.values())[0][0]
+            return Response({'detail': error_detail}, status.HTTP_400_BAD_REQUEST)

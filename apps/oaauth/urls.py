@@ -4,5 +4,5 @@ from . import views
 app_name = 'oaauth'
 urlpatterns = [
     path('login/', views.LoginAPIView.as_view(), name='login'),
-    path('resetpwd/', views.ResetPWDView.as_view(), name='resetpwd')
+    path('resetpwd/', views.ResetPwdView.as_view(), name='resetpwd')
 ]
