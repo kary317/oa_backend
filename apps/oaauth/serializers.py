@@ -3,8 +3,11 @@ from .models import OAUser, UserStatusChoice, OADepartment
 
 
 class LoginSerializer(serializers.Serializer):
-    email = serializers.EmailField(write_only=True)
-    password = serializers.CharField(max_length=20, min_length=6, write_only=True)
+    email = serializers.EmailField(write_only=True,
+                                   error_messages={'required': "email必填", 'invalid': '邮箱格式不正确'})
+    password = serializers.CharField(max_length=20, min_length=6, write_only=True,
+                                     error_messages={'required': 'password必填', 'min_length': '密码需要6-20位之间',
+                                                     'max_length': '密码需要6-20位之间'})
 
     def validate(self, attrs):
         email = attrs.get('email', None)

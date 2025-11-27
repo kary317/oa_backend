@@ -1,8 +1,10 @@
+from django.http import JsonResponse
 from rest_framework.views import APIView
 from .serializers import LoginSerializer, OAUserSerializer
 from rest_framework.response import Response
 from rest_framework import status
 import datetime
+from rest_framework.permissions import IsAuthenticated
 
 from .authentications import generate_jwt
 
@@ -19,3 +21,14 @@ class LoginAPIView(APIView):
         else:
             error_detail = list(serializer.errors.values())[0][0]
             return Response({'detail': error_detail}, status=status.HTTP_400_BAD_REQUEST)
+
+
+# class AuthenticateRequireView:
+#     permission_classes = [IsAuthenticated]
+
+
+class ResetPWDView(APIView):
+    def post(self, request):
+        print(request)
+        print(request.user)
+        return JsonResponse({'detail': 'success'})

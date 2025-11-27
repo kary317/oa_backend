@@ -13,6 +13,11 @@ def generate_jwt(user):
     return token
 
 
+class UserTokenAuthentication(BaseAuthentication):
+    def authenticate(self, request):
+        return request._request.user, request._request.auth
+
+
 class JWTAuthentication(BaseAuthentication):
     keyword = 'JWT'
 
