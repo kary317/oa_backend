@@ -23,7 +23,8 @@ class AbsentSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def validate_absent_type_id(self, value):
-        if not Absent.objects.filter(pk=value).exists():
+        # if not Absent.objects.filter(pk=value).exists():
+        if not AbsentType.objects.filter(pk=value).exists():
             raise exceptions.ValidationError('考勤类型不存在!')
         return value
 
