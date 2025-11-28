@@ -7,7 +7,9 @@ from django.shortcuts import render
 
 from rest_framework import viewsets
 from rest_framework import mixins
+
 from .models import Absent, AbsentType, AbsentStatusChoices
+from .serializers import AbsentSerializer
 
 
 class AbsentViewSet(mixins.CreateModelMixin,
@@ -15,4 +17,4 @@ class AbsentViewSet(mixins.CreateModelMixin,
                     mixins.ListModelMixin,
                     viewsets.GenericViewSet):
     queryset = Absent
-    serializer_class = None
+    serializer_class = AbsentSerializer
