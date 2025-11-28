@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     # 安装第三方cors
     'corsheaders',
     # 项目app
-    "apps.oaauth.apps.OaauthConfig"
+    "apps.oaauth.apps.OaauthConfig",
+    "apps.absent.apps.AbsentConfig"
 ]
 
 MIDDLEWARE = [
