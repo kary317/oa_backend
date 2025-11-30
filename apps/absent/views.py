@@ -8,9 +8,12 @@ from django.shortcuts import render
 from rest_framework import viewsets
 from rest_framework import mixins
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from .models import Absent, AbsentType, AbsentStatusChoices
-from .serializers import AbsentSerializer
+from .serializers import AbsentSerializer, AbsentTypeSerializer
+from .utils import get_responder
+from apps.oaauth.serializers import OAUserSerializer
 
 
 class AbsentViewSet(mixins.CreateModelMixin,
@@ -36,3 +39,38 @@ class AbsentViewSet(mixins.CreateModelMixin,
             result = queryset.filter(requester=request.user)
         serializer = self.serializer_class(result, many=True)
         return Response(serializer.data)
+
+
+# 获取请假类型API
+class AbsentTypeView(APIView):
+    def get(self, request):
+        types = AbsentType.objects.all()
+        serializer = AbsentTypeSerializer(types, many=True)
+        return Response(data=serializer.data)
+
+
+# 获取审批者API
+class ResponderView(APIView):
+    def get(self, request):
+        responder = get_responder(request)
+        # 如果序列化的对象是一个None，那么不会报错，而是返回一个包含除了主键外的所有字段的空字典,有默认值得用默认值
+        """
+        {
+            "department": {
+                "name": "",
+                "intro": "",
+                "leader": null,
+                "manager": null
+            },
+            "last_login": null,
+            "is_superuser": false,
+            "realname": "",
+            "email": "",
+            "telephone": "",
+            "is_staff": false,
+            "status": null,
+            "is_active": false
+        }
+        """
+        serializer = OAUserSerializer(responder)
+        return Response(data=serializer.data)

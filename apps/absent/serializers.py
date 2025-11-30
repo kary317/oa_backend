@@ -3,6 +3,7 @@ from rest_framework import exceptions
 
 from .models import Absent, AbsentType, AbsentStatusChoices
 from apps.oaauth.serializers import OAUserSerializer
+from .utils import get_responder
 
 
 class AbsentTypeSerializer(serializers.ModelSerializer):
@@ -33,18 +34,8 @@ class AbsentSerializer(serializers.ModelSerializer):
         # 当前登录用户是考勤发起者requester
         user = request.user
 
-        # 获取考勤审批者responder
-        # 如果是部门leader,又分董事会leader和非董事会leader
-        if user.department.leader.uid == user.uid:
-            if user.department.name == '董事会':
-                # 如果是董事会的leader,那么没有审批者
-                responder = None
-            else:
-                # 如果不是是董事会的leader,审批者是部门的管理者
-                responder = user.department.manager
-        else:
-            # 如果不是部门leader,审批者是部门leader
-            responder = user.department.leader
+        # 获取审批者
+        responder = get_responder(request)
 
         # 如果是董事会的leader,请假直接通过
         if responder is None:
