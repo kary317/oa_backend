@@ -37,6 +37,11 @@ class AbsentViewSet(mixins.CreateModelMixin,
             result = queryset.filter(responder=request.user)
         else:
             result = queryset.filter(requester=request.user)
+
+        page = self.paginate_queryset(result)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
         serializer = self.serializer_class(result, many=True)
         return Response(serializer.data)
 
