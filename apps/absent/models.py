@@ -54,3 +54,6 @@ class Absent(models.Model):
 
     # 10. 审批回复内容
     response_content = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ('-create_time',)
