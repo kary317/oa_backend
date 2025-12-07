@@ -1,3 +1,9 @@
-from django.shortcuts import render
+from rest_framework import viewsets
 
-# Create your views here.
+from .models import Inform
+from .serializers import InformSerializer
+
+
+class InformViewSet(viewsets.ModelViewSet):
+    queryset = Inform.objects.all()
+    serializer_class = InformSerializer
