@@ -11,6 +11,7 @@ class Inform(models.Model):
     # 通知创建时间
     create_time = models.DateTimeField(auto_now_add=True)
     # 通知是否公开,有些通知一些人能看,有些通知所有人能看
+    # 如果前端上传的department_ids中包含了0，比如[0]，那么就认为这个通知是所有部门可见,public设置为true
     public = models.BooleanField(default=False)
     # 通知是由谁发布的
     author = models.ForeignKey(OAUser, on_delete=models.CASCADE, related_name='informs', related_query_name='informs')
