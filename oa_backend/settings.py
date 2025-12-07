@@ -44,7 +44,8 @@ INSTALLED_APPS = [
     "apps.oaauth.apps.OaauthConfig",
     "apps.absent.apps.AbsentConfig",
     "apps.inform.apps.InformConfig",
-    "apps.staff.apps.StaffConfig"
+    "apps.staff.apps.StaffConfig",
+    "apps.image.apps.ImageConfig"
 ]
 
 MIDDLEWARE = [
