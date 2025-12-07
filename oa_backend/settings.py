@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     # 项目app
     "apps.oaauth.apps.OaauthConfig",
     "apps.absent.apps.AbsentConfig",
-    "apps.inform.apps.InformConfig"
+    "apps.inform.apps.InformConfig",
+    "apps.staff.apps.StaffConfig"
 ]
 
 MIDDLEWARE = [
