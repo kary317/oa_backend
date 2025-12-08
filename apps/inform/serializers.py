@@ -26,7 +26,7 @@ class InformSerializer(serializers.ModelSerializer):
 
         # 如果部门列表中有0,代表所有人可见
         if 0 in department_ids:
-            inform = Inform.objects.create(pullic=True, author=request.user, **validated_data)
+            inform = Inform.objects.create(public=True, author=request.user, **validated_data)
         else:
             departments = OADepartment.objects.filter(id__in=department_ids).all()
             # 如果不指定public为read_only_fields,那么前端使用表单方式提交数据,validated_data中会自带有public=false的键值对

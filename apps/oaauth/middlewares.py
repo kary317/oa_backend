@@ -21,7 +21,8 @@ class LoginCheckMiddleware(MiddlewareMixin):
         self.white_list = ('/auth/register/', '/auth/login/')
 
     def process_request(self, request):
-        if request.path in self.white_list:
+        # 如果访问路径在白名单或者是访问媒体路径都给放行,无需登录
+        if request.path in self.white_list or request.path.startswith(settings.MEDIA_URL):
             # if request.path == '/auth/login/':
             request.user = AnonymousUser()
             request.auth = None
