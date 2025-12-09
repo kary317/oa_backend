@@ -36,3 +36,6 @@ class InformSerializer(serializers.ModelSerializer):
             inform.departments.set(departments)
             inform.save()
         return inform
+
+class ReadInformSerializer(serializers.Serializer):
+    inform_pk = serializers.IntegerField(error_messages={"required": '请传入inform的id！'})
