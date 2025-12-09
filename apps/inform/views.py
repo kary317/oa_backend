@@ -17,7 +17,7 @@ class InformViewSet(viewsets.ModelViewSet):
     # 3. inform.author = request.user 通知的作者是当前登录用户
     def get_queryset(self):
         queryset = self.queryset.select_related('author').prefetch_related('reads', 'departments').filter(
-            Q(public=True) | Q(departments=self.request.user.department) | Q(author=self.request.user))
+            Q(public=True) | Q(departments=self.request.user.department) | Q(author=self.request.user)).distinct()
         return queryset
         # for inform in queryset:
         #     inform.is_read = InformRead.objects.filter(inform=inform, user=self.request.user).exsits()
