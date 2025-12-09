@@ -5,11 +5,18 @@ from apps.oaauth.serializers import OAUserSerializer, DepartmentSerializer
 from apps.oaauth.models import OADepartment
 
 
+class InformReadSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InformRead
+        fields = "__all__"
+
+
 class InformSerializer(serializers.ModelSerializer):
     author = OAUserSerializer(read_only=True)
     departments = DepartmentSerializer(many=True, read_only=True)
     # ListField字段接受列表,获取前端传过来的部门列表
     department_ids = serializers.ListField(write_only=True)
+    reads = InformReadSerializer(many=True, read_only=True)
 
     class Meta:
         model = Inform
@@ -36,6 +43,7 @@ class InformSerializer(serializers.ModelSerializer):
             inform.departments.set(departments)
             inform.save()
         return inform
+
 
 class ReadInformSerializer(serializers.Serializer):
     inform_pk = serializers.IntegerField(error_messages={"required": '请传入inform的id！'})

@@ -3,6 +3,7 @@ from django.db.models import Q
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
+from django.db.models import Prefetch
 
 from .models import Inform, InformRead
 from .serializers import InformSerializer, ReadInformSerializer
@@ -17,7 +18,8 @@ class InformViewSet(viewsets.ModelViewSet):
     # 2. inform.departments 包含了用户所在的部门
     # 3. inform.author = request.user 通知的作者是当前登录用户
     def get_queryset(self):
-        queryset = self.queryset.select_related('author').prefetch_related('reads', 'departments').filter(
+        queryset = self.queryset.select_related('author').prefetch_related(
+            Prefetch('reads', queryset=InformRead.objects.filter(user_id=self.request.user.uid)), 'departments').filter(
             Q(public=True) | Q(departments=self.request.user.department) | Q(author=self.request.user)).distinct()
         return queryset
         # for inform in queryset:
