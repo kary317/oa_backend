@@ -148,6 +148,7 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 10,
 }
 
+# 发送邮件
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.qq.com'
@@ -155,3 +156,9 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = '1348905268@qq.com'
 EMAIL_HOST_PASSWORD = 'hxvicjtteaoahdij'
 DEFAULT_FROM_EMAIL = '1348905268@qq.com'
+
+# celery配置相关
+# 中间人的配置
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379/1'
+# 指定结果的接受地址
+CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/2'

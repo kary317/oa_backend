@@ -2,4 +2,5 @@
 *.pyc
 apps/*/migrations/*.py
 !apps/*/migrations/__init__.py
-media
+media/
+*.log

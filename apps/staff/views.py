@@ -5,12 +5,13 @@ from django.contrib.auth import get_user_model
 from rest_framework import status
 from django.core.mail import send_mail
 from django.conf import settings
+from django.urls import reverse
 
 from apps.oaauth.models import OADepartment
 from apps.oaauth.serializers import DepartmentSerializer
 from .serializers import AddStaffSerializer
 from utils import aeser
-from django.urls import reverse
+from oa_backend.celery import debug_task
 
 OAUser = get_user_model()
 aes = aeser.AESCipher(settings.SECRET_KEY)
@@ -72,3 +73,11 @@ class StaffView(APIView):
         # 为了区分用户，在发送链接邮件中，该链接中应该要包含这个用户的邮箱
         # 针对邮箱要进行加密：AES加密
         send_mail('OA员工激活', message=message, from_email=settings.DEFAULT_FROM_EMAIL, recipient_list=[email])
+
+
+# 测试celery是否集成到django项目
+class TestCeleryView(APIView):
+    def get(self, request):
+        # 用celery异步执行debug_task任务
+        debug_task.delay()
+        return Response({'detail': '测试celery成功'})
