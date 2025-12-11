@@ -12,6 +12,7 @@ from apps.oaauth.serializers import DepartmentSerializer
 from .serializers import AddStaffSerializer
 from utils import aeser
 from oa_backend.celery import debug_task
+from .tasks import send_mail_task
 
 OAUser = get_user_model()
 aes = aeser.AESCipher(settings.SECRET_KEY)
@@ -69,10 +70,13 @@ class StaffView(APIView):
         active_url = self.request.build_absolute_uri(active_path)
 
         message = f'请点击以下链接激活账号：{active_url}'
+
+        subject = 'OA员工激活'
         # 发送一个链接，让用户点击这个链接后，跳转到激活的页面，才能激活。
         # 为了区分用户，在发送链接邮件中，该链接中应该要包含这个用户的邮箱
         # 针对邮箱要进行加密：AES加密
-        send_mail('OA员工激活', message=message, from_email=settings.DEFAULT_FROM_EMAIL, recipient_list=[email])
+        # send_mail('OA员工激活', message=message, from_email=settings.DEFAULT_FROM_EMAIL, recipient_list=[email])
+        send_mail_task.delay(email, subject, message)
 
 
 # 测试celery是否集成到django项目
