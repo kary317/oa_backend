@@ -8,10 +8,11 @@ from django.conf import settings
 from django.urls import reverse
 from django.views import View
 from django.shortcuts import render
+from django.http.response import JsonResponse
 
-from apps.oaauth.models import OADepartment
+from apps.oaauth.models import OADepartment, UserStatusChoice
 from apps.oaauth.serializers import DepartmentSerializer
-from .serializers import AddStaffSerializer
+from .serializers import AddStaffSerializer, ActiveStaffSerializer
 from utils import aeser
 from oa_backend.celery import debug_task
 from .tasks import send_mail_task
@@ -32,11 +33,37 @@ class DepartmentListView(ListAPIView):
 # 2. 校验用户上传的邮箱和密码是否正确，并且解密token中的邮箱，与用户提交的邮箱进行对比，如果都相同，那么就是激活成功
 # class ActiveStaffView(APIView):
 class ActiveStaffView(View):
+    # 获取激活页面
     def get(self, request):
         token = request.GET.get('token')
         response = render(request, 'active.html')
         response.set_cookie('token', token)
         return response
+
+    # 激活员工
+    def post(self, request):
+        try:
+            token = request.COOKIES.get('token')
+            email = aes.decrypt(token)
+            serializer = ActiveStaffSerializer(data=request.POST)
+            if serializer.is_valid():
+                # 这种方式不可取，如果serializer.is_valid通过验证，应该直接从清洗数据中提取数据
+                # form_email = request.POST.get('email')
+
+                form_email = serializer.validated_data.get('email')
+                user = serializer.validated_data.get('user')
+                if email != form_email:
+                    return JsonResponse({'code': 400, 'detail': '邮箱错误!'})
+
+                user.status = UserStatusChoice.ACTIVED
+                user.save()
+                return JsonResponse({'code': 200, 'detail': ''})
+            else:
+                detail = list(serializer.errors.values())[0][0]
+                return JsonResponse({'code': 400, 'detail': detail})
+        except Exception as e:
+            print(e)
+            return JsonResponse({'code': 400, 'detail': 'token错误!'})
 
 
 class StaffView(APIView):
