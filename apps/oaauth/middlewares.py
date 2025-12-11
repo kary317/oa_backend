@@ -18,7 +18,7 @@ class LoginCheckMiddleware(MiddlewareMixin):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # 开放url白名单
-        self.white_list = ('/auth/register/', '/auth/login/')
+        self.white_list = ('/auth/register/', '/auth/login/', '/staff/active/')
 
     def process_request(self, request):
         # 如果访问路径在白名单或者是访问媒体路径都给放行,无需登录

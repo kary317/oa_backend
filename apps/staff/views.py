@@ -6,6 +6,8 @@ from rest_framework import status
 from django.core.mail import send_mail
 from django.conf import settings
 from django.urls import reverse
+from django.views import View
+from django.shortcuts import render
 
 from apps.oaauth.models import OADepartment
 from apps.oaauth.serializers import DepartmentSerializer
@@ -24,9 +26,17 @@ class DepartmentListView(ListAPIView):
 
 
 # 激活员工邮箱
-class ActiveStaffView(APIView):
+# 激活员工的过程：
+# 1. 用户访问激活的链接的时候，会返回一个含有表单的页面，视图中可以获取到token，为了在用户提交表单的时候，post函数中能知道这个token
+# 我们可以在返回页面之前，先把token存储在cookie中
+# 2. 校验用户上传的邮箱和密码是否正确，并且解密token中的邮箱，与用户提交的邮箱进行对比，如果都相同，那么就是激活成功
+# class ActiveStaffView(APIView):
+class ActiveStaffView(View):
     def get(self, request):
-        return Response()
+        token = request.GET.get('token')
+        response = render(request, 'active.html')
+        response.set_cookie('token', token)
+        return response
 
 
 class StaffView(APIView):
