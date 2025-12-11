@@ -9,6 +9,8 @@ from django.urls import reverse
 from django.views import View
 from django.shortcuts import render
 from django.http.response import JsonResponse
+# urllib.parse.urlencode函数处理url编码问题
+from urllib import parse
 
 from apps.oaauth.models import OADepartment, UserStatusChoice
 from apps.oaauth.serializers import DepartmentSerializer
@@ -99,10 +101,16 @@ class StaffView(APIView):
 
     # 发送激活邮件
     def send_active_email(self, email):
+        # 生成的token=LSAqHWUqgAKYY6GfAjVQaqKfGeFl/5+vDe9MP3F6rCU=
+        # 生成的token有`+`,`=`,'/'等等之类的url特殊字符，需要特殊处理,通过'urllib.parse.urlencode'函数处理
         token = aes.encrypt(email)
 
         # '/staff/active/?token='xxx'
-        active_path = reverse('staff:active_staff') + '?token=' + token
+        # active_path = reverse('staff:active_staff') + '?token=' + token
+        # 通过urllib.parse.urlencode函数处理url编码
+        # urlencode({'token': token}) 会得到 'token=LSAqHWUqgAKYY6GfAjVQaqKfGeFl%2F5%2BvDe9MP3F6rCU%3D'
+        # '/'变成'%2F','+'变成'%2B','='变成'%3D'
+        active_path = reverse('staff:active_staff') + '?' + parse.urlencode({'token': token})
         # 通过self.request.build_absolute_uri构建绝对路径url ==> http://127.0.0.1:8000/staff/active/?token='xxx'
         active_url = self.request.build_absolute_uri(active_path)
 
