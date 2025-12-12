@@ -1,4 +1,4 @@
-from rest_framework.generics import ListAPIView
+from rest_framework.generics import ListAPIView, ListCreateAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
@@ -11,13 +11,15 @@ from django.shortcuts import render
 from django.http.response import JsonResponse
 # urllib.parse.urlencode函数处理url编码问题
 from urllib import parse
+from rest_framework import exceptions
 
 from apps.oaauth.models import OADepartment, UserStatusChoice
-from apps.oaauth.serializers import DepartmentSerializer
+from apps.oaauth.serializers import DepartmentSerializer, OAUserSerializer
 from .serializers import AddStaffSerializer, ActiveStaffSerializer
 from utils import aeser
 from oa_backend.celery import debug_task
 from .tasks import send_mail_task
+from .paginations import StaffListPagination
 
 OAUser = get_user_model()
 aes = aeser.AESCipher(settings.SECRET_KEY)
@@ -68,13 +70,40 @@ class ActiveStaffView(View):
             return JsonResponse({'code': 400, 'detail': 'token错误!'})
 
 
-class StaffView(APIView):
-    # 获取员工列表
-    def get(self, request):
-        pass
+# class StaffView(APIView):
+class StaffView(ListCreateAPIView):
+    queryset = OAUser.objects.all()
+    pagination_class = StaffListPagination
+
+    # 重写get_serializer_class,因为get方法和post方法用的不同序列化器
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return OAUserSerializer
+        else:
+            return AddStaffSerializer
+
+    # 获取员工列表，需要分页处理，我们采用drf框架自带的分页器，那么需要继承GenericAPIView或者它的子类
+    # 这里不重写list方法,重写list方法需要自己实现分页逻辑,重写get_queryset方法,自己定制返回的queryset
+    # def get(self, request):
+    def get_queryset(self):
+        queryset = self.queryset
+
+        # 返回员工列表逻辑：
+        # 1. 如果是董事会的，那么返回所有员工
+        # 2. 如果不是董事会的，但是是部门的leader，那么就返回部门的员工
+        # 3. 如果不是董事会的，也不是部门leader，那么就抛出403 Forbidden错误
+        user = self.request.user
+
+        if user.department.name != '董事会':
+            if user.department.leader.uid != user.uid:
+                raise exceptions.PermissionDenied()
+            else:
+                queryset = queryset.filter(department_id=user.department.id)
+        return queryset.order_by('-date_joined').all()
 
     # 新增员工
-    def post(self, request):
+    # def post(self, request):
+    def create(self, request, *args, **kwargs):
         # 如果用的是视图集，那么视图集会自动把request放到context中
         # 如果是直接继承自APIView，那么就需要手动将request对象传给serializer.context中
         serializer = AddStaffSerializer(data=request.data, context={'request': request})
