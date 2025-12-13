@@ -12,6 +12,8 @@ from django.http.response import JsonResponse
 # urllib.parse.urlencode函数处理url编码问题
 from urllib import parse
 from rest_framework import exceptions
+from rest_framework import viewsets
+from rest_framework import mixins
 
 from apps.oaauth.models import OADepartment, UserStatusChoice
 from apps.oaauth.serializers import DepartmentSerializer, OAUserSerializer
@@ -71,13 +73,17 @@ class ActiveStaffView(View):
 
 
 # class StaffView(APIView):
-class StaffView(ListCreateAPIView):
+# class StaffView(ListCreateAPIView):
+# 用视图集的方式改写视图类,这样路由生成会简便且更美观易懂,否则put请求还要单独加个带id的url
+class StaffViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.CreateModelMixin, mixins.UpdateModelMixin):
     queryset = OAUser.objects.all()
     pagination_class = StaffListPagination
 
     # 重写get_serializer_class,因为get方法和post方法用的不同序列化器
     def get_serializer_class(self):
-        if self.request.method == 'GET':
+        # if self.request.method == 'GET':
+        # put请求更新员工状态也使用OAUserSerializer序列化器
+        if self.request.method in ['GET', 'PUT']:
             return OAUserSerializer
         else:
             return AddStaffSerializer
@@ -151,6 +157,11 @@ class StaffView(ListCreateAPIView):
         # 针对邮箱要进行加密：AES加密
         # send_mail('OA员工激活', message=message, from_email=settings.DEFAULT_FROM_EMAIL, recipient_list=[email])
         send_mail_task.delay(email, subject, message)
+
+    # 更新员工信息,重写update方法开启局部更新
+    def update(self, request, *args, **kwargs):
+        kwargs['partial'] = True
+        return super().update(request, *args, **kwargs)
 
 
 # 测试celery是否集成到django项目
