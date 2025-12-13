@@ -14,6 +14,7 @@ from urllib import parse
 from rest_framework import exceptions
 from rest_framework import viewsets
 from rest_framework import mixins
+from datetime import datetime
 
 from apps.oaauth.models import OADepartment, UserStatusChoice
 from apps.oaauth.serializers import DepartmentSerializer, OAUserSerializer
@@ -92,6 +93,11 @@ class StaffViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Create
     # 这里不重写list方法,重写list方法需要自己实现分页逻辑,重写get_queryset方法,自己定制返回的queryset
     # def get(self, request):
     def get_queryset(self):
+        # print(self.request.query_params)
+        department_id = self.request.query_params.get('department_id')
+        realname = self.request.query_params.get('realname')
+        date_joined = self.request.query_params.getlist('date_joined[]')
+
         queryset = self.queryset
 
         # 返回员工列表逻辑：
@@ -105,6 +111,28 @@ class StaffViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Create
                 raise exceptions.PermissionDenied()
             else:
                 queryset = queryset.filter(department_id=user.department.id)
+        else:
+            # 只有董事会的成员,可以看到所有员工列表,才允许按照部门过滤
+            # 不是董事会的成员,不允许按照部门过滤
+            if department_id:
+                queryset = queryset.filter(department_id=department_id)
+
+        if realname:
+            # queryset = queryset.filter(realname=realname)
+            # 前端输入的名字 数据库中只要包含就给返回
+            queryset = queryset.filter(realname__icontains=realname)
+        if date_joined:
+            # 有可能传递的时间列表只有一个元素,date_joined[1]切片可能会报错,用try捕获
+            try:
+                # 前端输入的传入的时间格式 ['2024-10-01', '2024-10-10']，我们需要转换时间格式
+                start_date = datetime.strptime(date_joined[0], '%Y-%m-%d')
+                end_date = datetime.strptime(date_joined[1], '%Y-%m-%d')
+
+                # 执行到这一步说明获取时间没有出现问题,可以根据时间进行过滤了
+                queryset = queryset.filter(date_joined__range=(start_date, end_date))
+            except Exception:
+                # 前端输入的时间不满足我们的要求,我们就不对queryset进行处理,也就是不根据时间进行过滤
+                pass
         return queryset.order_by('-date_joined').all()
 
     # 新增员工
